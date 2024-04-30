@@ -86,17 +86,21 @@ TODO INSERT TABLE
 
 ### Goal 3: Domain-specific adaptation
 
+TODO INSERT REPROJECTION AMBIGUITY
+
+Finally, I attempted to retrain the SuperGlue framework to work better on the EUROC dataset without sacrificing much in the way of general capability. I also reformulated the loss function so that the "ground-truth" correspondences were more lenient. In the original paper, ground-truth correspondences are 1-to-1. That is, if feature A matches with feature B, then Feature A cannot match with feature C. However, in my formulation since A is close enough to B and C, both are considered ground-truth correspondences and the loss function tries to maximize the likelihood of both as matches.
+
 TODO INSERT SUPERGLUE HISTOGRAMS
 
 TODO INSERT SUPERGLUE TABLE
 
-Finally, I attempted to retrain the SuperGlue framework to work better on the EUROC dataset without sacrificing much in the way of general capability. I varied the threshold on the confidence of feature matches between 0.2, 0.5 and 0.8 for my evaluation. The results show fairly similar performance between the pretrained model and mine at all confidence thresholds, albeit the pretrained performs slightly better.
+I varied the threshold on the confidence of feature matches between 0.2, 0.5 and 0.8 for my evaluation. The results, shown above, show fairly similar performance between the pretrained model and mine at all confidence thresholds, albeit the pretrained performs slightly better.
 
 TODO INSERT SUPERGLUE SEQUENTIAL HISTOGRAMS
 
 TODO INSERT SUPERGLUE SEQUENTIAL TABLE
 
-However, when evaluating on the test set of the EUROC data, it is clear that the domain-specific training worked. While the precision is similar between the two, the total number of inliers keypoints is significantly higher, indicating the training allowed the network to be more confident about feature matches in this specific environment. The difference in results between the two networks are shown visually below.
+However, when evaluating on the test set of the EUROC data (shown above), it is clear that the domain-specific training worked. While the precision is similar between the two, the total number of inliers keypoints is significantly higher, indicating the training allowed the network to be more confident about feature matches in this specific environment. The difference in results between the two networks are shown visually below.
 
 TODO INSERT SUPERGLUE SEQUENTIAL GIF
 
