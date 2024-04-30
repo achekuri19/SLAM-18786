@@ -13,7 +13,10 @@ This repository contains re-implementations of the [SuperPoint](https://arxiv.or
 
 Feature detection and matching are classical problems in computer vision, 3-D reconstruction and simultaneous localization and mapping (SLAM). By matching sparse features between sets of images, we can triangulate all these points and create a 3-D pointcloud representation of the scene directly from images, as well as an understanding of camera positioning in the scene. Examples of feature matching and a 3-D pointcloud reconstruction are below.
 
-TODO PHOTOS OF POINTCLOUD AND FEATURE MATCHING
+![match_demo](https://github.com/achekuri19/SLAM-18786/assets/19337786/86c2d503-92f4-4e6d-b671-6f0d400af6fd)
+
+![colmap](https://github.com/achekuri19/SLAM-18786/assets/19337786/2e8e5af1-755d-441c-9d45-4058f7799c73)
+
 
 However, failure to properly match features can be catastrophic for any pipeline as bad data muddies the accuracy of 3D reconstruction, localization or mapping. The above photo shows an example of this, with correct feature matches shown in green, and incorrect shown in red. 
 
@@ -55,11 +58,15 @@ To address the second goal, I explored changing the weights of the loss function
 
 TODO INSERT IMAGE OF LOSS FUNCTION
 
-To address the third goal, I retrained SuperGlue using the [EUROC](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets#the_euroc_mav_dataset) dataset, which is visual flight data from a micro-aerial vehicle. I also made a slight modification to the loss function which I will describe later (and in my video). I evaluated its performance on both a standard evaluation dataset and specifically on the EUROC dataset to see if performance in the specific environment captured by EUROC was improved. 
+To address the third goal, I retrained SuperGlue using the [EUROC](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets#the_euroc_mav_dataset) dataset, which is visual flight data from a micro-aerial vehicle. I also made a slight modification to the loss function which I will describe later (and in my video). I evaluated its performance on both a standard evaluation dataset and specifically on the EUROC dataset to see if performance in the specific environment captured by EUROC (shown below) was improved. 
 
 TODO INSERT IMAGE OF EUROC
 
 ## Results
+
+TODO INSERT PRECISION AND TOTAL FOR SIFT SUPERPOINT
+
+First, the performance of SIFT and SuperPoint are shown above. Both detect similar number of inlier features, but SuperPoint is clearly higher precision. SuperPoint also runs in 28.5 ms versus 162 ms for SIFT extraction.
 
 ### Goal 1: Reducing dimensionality
 
@@ -73,7 +80,12 @@ The second iteration, SuperPoint Compact v2, actually produced worse results. Th
 
 Finally, the overall precision, total inlier points detected, number of parameters in each architecture, and runtime are shown below.
 
-TODO INSERT TABLE
+
+| Architecture | Precision | # of Inliers | # Parameters | Runtime (ms) |
+| :---         |     ---:      |          ---: |          ---: |          ---: |
+| SuperPoint (pretrained)   | 0.367 | 49.2 | 1.3M | 28.4 |
+| SuperPoint Compact  | 0.107 | 68.0 | 1.08M | 29.4 |
+| SuperPoint Compact v2  | 0.113 | 46.6 | 0.73M | 15.4 |
 
 
 ### Goal 2: Improving precision
@@ -82,7 +94,12 @@ TODO INSERT PRECISION AND TOTAL HISTOGRAM FOR PRETRAIN VS SUPER
 
 As described earlier, I re-trained SuperPoint with new cost function weighting to favor feature descriptor loss rather than feature detector loss. I trained with the 2017 COCO dataset (> 40,000 images) for 10 epochs with an initial learning rate of 0.0005 and a batch size of 16. The results show that there is very little difference between the two networks; the pretrained model has slightly better precision while my model has slightly more inliers detected on average. The results are tabulated below
 
-TODO INSERT TABLE
+| Architecture | Precision | # of Inliers |
+| :---         |     ---:      |          ---: |
+| SuperPoint (pretrained)   | 0.367 | 49.2 |
+| SuperPoint (mine)  | 0.338 | 56.2 |
+
+The changes were actually opposite to what my intuition suggested as precision was decreased while volume of inliers increased. Honestly, it's hard to understand exactly why these changes happen especially because the problem is coupled with the data used to train. The detector loss is contingent on what is considered a keypoint in the first place, which depends on how MagicPoint (see the [SuperPoint](https://github.com/achekuri19/SuperPoint-18786/tree/main) submodule for more) was trained. 
 
 ### Goal 3: Domain-specific adaptation
 
@@ -92,17 +109,30 @@ Finally, I attempted to retrain the SuperGlue framework to work better on the EU
 
 TODO INSERT SUPERGLUE HISTOGRAMS
 
-TODO INSERT SUPERGLUE TABLE
+| Architecture | Precision | # of Inliers |
+| :---         |     ---:      |          ---: |
+| p=0.2 SuperGlue (pretrained) | 0.133 | 75.4 |
+| p=0.2 SuperGlue EUROC | 0.104 | 69.4 |
+| p=0.5 SuperGlue (pretrained) | 0.269 | 47.7 |
+| p=0.5 SuperGlue EUROC | 0.203 | 58.0 |
+| p=0.8 SuperGlue (pretrained)  | 0.705 | 43.6 |
+| p=0.8 SuperGlue EUROC | 0.678 | 37.0 |
 
 I varied the threshold on the confidence of feature matches between 0.2, 0.5 and 0.8 for my evaluation. The results, shown above, show fairly similar performance between the pretrained model and mine at all confidence thresholds, albeit the pretrained performs slightly better.
 
 TODO INSERT SUPERGLUE SEQUENTIAL HISTOGRAMS
 
-TODO INSERT SUPERGLUE SEQUENTIAL TABLE
+| Architecture | Precision | # of Inliers |
+| :---         |     ---:      |          ---: |
+| SuperGlue (pretrained) | 0.902 | 284.8 |
+| SuperGlue EUROC | 0.918 | 91.0 |
 
-However, when evaluating on the test set of the EUROC data (shown above), it is clear that the domain-specific training worked. While the precision is similar between the two, the total number of inliers keypoints is significantly higher, indicating the training allowed the network to be more confident about feature matches in this specific environment. The difference in results between the two networks are shown visually below.
+However, when evaluating on the test set of the EUROC data (shown above), it is clear that the domain-specific training worked. While the precision is similar between the two, the total number of inliers keypoints is significantly higher, indicating the training allowed the network to be more confident about feature matches in this specific environment. The difference in results between the two networks are shown visually below. (pretrained above, mine below)
 
-TODO INSERT SUPERGLUE SEQUENTIAL GIF
+https://github.com/achekuri19/SLAM-18786/assets/19337786/b6d972a5-51ef-41e4-afd5-b270a31d9ccd
+
+https://github.com/achekuri19/SLAM-18786/assets/19337786/9c7056cf-bb82-4f85-8c53-ad53e053aa0a
+
 
 
 
