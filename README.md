@@ -40,7 +40,7 @@ The central goal of my reimplementation of these papers is to see if I can optim
 
 TODO INSERT GIF OF OPTICAL FLOW RUNNING ON MAV
 
-1) reduce the computation time for SuperPoint,
+1) reduce the computation time for SuperPoint without sacrificing performance,
 2) improve the overall precision of feature matching
 3) see if I can adapt the feature matching pipeline to perform better in a specific environment without sacrificing too much general performance.
 4) generally learn to implement the full training pipeline for both SuperPoint and SuperGlue (I trained SuperPoint from scratch and re-trained SuperGlue. The datasets used to train both are not publically available)
@@ -55,7 +55,7 @@ To address the second goal, I explored changing the weights of the loss function
 
 TODO INSERT IMAGE OF LOSS FUNCTION
 
-To address the third goal, I retrained SuperGlue using the [EUROC](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets#the_euroc_mav_dataset) dataset, which is visual flight data from a micro-aerial vehicle. I evaluated its performance on both a standard evaluation dataset and specifically on the EUROC dataset to see if performance in the specific environment captured by EUROC was improved. 
+To address the third goal, I retrained SuperGlue using the [EUROC](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets#the_euroc_mav_dataset) dataset, which is visual flight data from a micro-aerial vehicle. I also made a slight modification to the loss function which I will describe later (and in my video). I evaluated its performance on both a standard evaluation dataset and specifically on the EUROC dataset to see if performance in the specific environment captured by EUROC was improved. 
 
 TODO INSERT IMAGE OF EUROC
 
@@ -63,9 +63,42 @@ TODO INSERT IMAGE OF EUROC
 
 ### Goal 1: Reducing dimensionality
 
+TODO INSERT PRECISION AND TOTAL HISTOGRAM FOR COMPACT
+
+As shown above, the first iteration a faster SuperPoint, SuperPoint Compact, did not produce such ideal results in terms of precision. The average precision on the same dataset was lower, although the total number of inlier features detected was similar. Even the latency of running SuperPoint Compact was similar. 
+
+TODO INSERT PRECISION AND TOTAL HISTOGRAM FOR COMPACT V2
+
+The second iteration, SuperPoint Compact v2, actually produced worse results. The average precision was similar to SuperPoint Compact, but much fewer keypoints were actually detected. However, this version runs twice as fast.
+
+Finally, the overall precision, total inlier points detected, number of parameters in each architecture, and runtime are shown below.
+
+TODO INSERT TABLE
+
+
 ### Goal 2: Improving precision
 
+TODO INSERT PRECISION AND TOTAL HISTOGRAM FOR PRETRAIN VS SUPER
+
+As described earlier, I re-trained SuperPoint with new cost function weighting to favor feature descriptor loss rather than feature detector loss. I trained with the 2017 COCO dataset (> 40,000 images) for 10 epochs with an initial learning rate of 0.0005 and a batch size of 16. The results show that there is very little difference between the two networks; the pretrained model has slightly better precision while my model has slightly more inliers detected on average. The results are tabulated below
+
+TODO INSERT TABLE
+
 ### Goal 3: Domain-specific adaptation
+
+TODO INSERT SUPERGLUE HISTOGRAMS
+
+TODO INSERT SUPERGLUE TABLE
+
+Finally, I attempted to retrain the SuperGlue framework to work better on the EUROC dataset without sacrificing much in the way of general capability. I varied the threshold on the confidence of feature matches between 0.2, 0.5 and 0.8 for my evaluation. The results show fairly similar performance between the pretrained model and mine at all confidence thresholds, albeit the pretrained performs slightly better.
+
+TODO INSERT SUPERGLUE SEQUENTIAL HISTOGRAMS
+
+TODO INSERT SUPERGLUE SEQUENTIAL TABLE
+
+However, when evaluating on the test set of the EUROC data, it is clear that the domain-specific training worked. While the precision is similar between the two, the total number of inliers keypoints is significantly higher, indicating the training allowed the network to be more confident about feature matches in this specific environment. The difference in results between the two networks are shown visually below.
+
+TODO INSERT SUPERGLUE SEQUENTIAL GIF
 
 
 
