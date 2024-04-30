@@ -13,7 +13,10 @@ This repository contains re-implementations of the [SuperPoint](https://arxiv.or
 
 Feature detection and matching are classical problems in computer vision, 3-D reconstruction and simultaneous localization and mapping (SLAM). By matching sparse features between sets of images, we can triangulate all these points and create a 3-D pointcloud representation of the scene directly from images, as well as an understanding of camera positioning in the scene. Examples of feature matching and a 3-D pointcloud reconstruction are below.
 
-TODO PHOTOS OF POINTCLOUD AND FEATURE MATCHING
+![match_demo](https://github.com/achekuri19/SLAM-18786/assets/19337786/86c2d503-92f4-4e6d-b671-6f0d400af6fd)
+
+![colmap](https://github.com/achekuri19/SLAM-18786/assets/19337786/2e8e5af1-755d-441c-9d45-4058f7799c73)
+
 
 However, failure to properly match features can be catastrophic for any pipeline as bad data muddies the accuracy of 3D reconstruction, localization or mapping. The above photo shows an example of this, with correct feature matches shown in green, and incorrect shown in red. 
 
