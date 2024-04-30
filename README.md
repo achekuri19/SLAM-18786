@@ -61,6 +61,10 @@ TODO INSERT IMAGE OF EUROC
 
 ## Results
 
+TODO INSERT PRECISION AND TOTAL FOR SIFT SUPERPOINT
+
+First, the performance of SIFT and SuperPoint are shown above. Both detect similar number of inlier features, but SuperPoint is clearly higher precision. SuperPoint also runs in 28.5 ms versus 162 ms for SIFT extraction.
+
 ### Goal 1: Reducing dimensionality
 
 TODO INSERT PRECISION AND TOTAL HISTOGRAM FOR COMPACT
@@ -73,7 +77,12 @@ The second iteration, SuperPoint Compact v2, actually produced worse results. Th
 
 Finally, the overall precision, total inlier points detected, number of parameters in each architecture, and runtime are shown below.
 
-TODO INSERT TABLE
+
+| Architecture | Precision | # of Inliers | # Parameters | Runtime (ms) |
+| :---         |     ---:      |          ---: |          ---: |          ---: |
+| SuperPoint (pretrained)   | 0.367 | 49.2 | 1.3M | 28.4 |
+| SuperPoint Compact  | 0.107 | 68.0 | 1.08M | 29.4 |
+| SuperPoint Compact v2  | 0.113 | 46.6 | 0.73M | 15.4 |
 
 
 ### Goal 2: Improving precision
