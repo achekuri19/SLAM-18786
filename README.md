@@ -35,5 +35,22 @@ The big advantages of SuperPoint and SuperGlue are that they address the challen
 SuperGlue utilizes an attentional graph neural network (GNN) after encoding both keypoint descriptors and location in images to perform feature matching. By leveraging this framework, SuperGlue better matches keypoints by considering the overall structure of the image. Also note that SuperGlue can actually be trained with ANY feature descriptor. SuperGlue, with slight modification, can be trained to use SIFT feature descriptors. However, as I will describe later, SuperPoint proves to be a foundationally superior keypoint detector to SIFT.
 
 ## Goals of this reimplementation
-The central goal of my reimplementation of these papers is to see if I can optimize both SuperPoint and SuperGlue to run on a platform with very limited compute e.g. on a micro aerial vehicle (MAV). My goal was essentially to see if I could 1) reduce the computation time for SuperPoint, 2) improve overall precision in matching so that verifying inlier/outlier correspondences takes less time, and 3) see if I can adapt the feature matching pipeline to perform better in a specific environment without sacrificing too much general performance.
+The central goal of my reimplementation of these papers is to see if I can optimize both SuperPoint and SuperGlue to run on a platform with very limited compute e.g. on a micro aerial vehicle (MAV). My goal was essentially to see if I could 
+
+TODO INSERT GIF OF OPTICAL FLOW RUNNING ON MAV
+
+1) reduce the computation time for SuperPoint,
+2) improve total number of features matched correctly without sacrificing precision
+3) see if I can adapt the feature matching pipeline to perform better in a specific environment without sacrificing too much general performance.
+4) generally learn to implement the full training pipeline for both SuperPoint and SuperGlue (I trained SuperPoint from scratch and re-trained SuperGlue. The datasets used to train both are not publically available)
+
+## Experiments
+
+To address the first goal, I explored reducing the overall size of the SuperPoint architecture. I first reduced the number of CNN layers in the baseline SuperPoint architecture, which I called "SuperPoint Compact", and then I additionally reduced the dimensionality of the feature descriptors extracted by SuperPoint from 256 to 128. The overall number of trainable parameters in each architecture are shown below
+
+INSERT IMAGE OF ARCHITECTURE PARAMS
+
+
+
+
 
