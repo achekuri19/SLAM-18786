@@ -1,0 +1,6 @@
+[submodule "SuperPoint-18786"]
+	path = SuperPoint-18786
+	url = git@github.com:achekuri19/SuperPoint-18786.git
+[submodule "SuperGlue-18786"]
+	path = SuperGlue-18786
+	url = git@github.com:achekuri19/SuperGlue-18786.git
