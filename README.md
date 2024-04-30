@@ -40,7 +40,7 @@ The central goal of my reimplementation of these papers is to see if I can optim
 TODO INSERT GIF OF OPTICAL FLOW RUNNING ON MAV
 
 1) reduce the computation time for SuperPoint,
-2) improve total number of features matched correctly without sacrificing precision
+2) improve the overall precision of feature matching
 3) see if I can adapt the feature matching pipeline to perform better in a specific environment without sacrificing too much general performance.
 4) generally learn to implement the full training pipeline for both SuperPoint and SuperGlue (I trained SuperPoint from scratch and re-trained SuperGlue. The datasets used to train both are not publically available)
 
@@ -48,8 +48,23 @@ TODO INSERT GIF OF OPTICAL FLOW RUNNING ON MAV
 
 To address the first goal, I explored reducing the overall size of the SuperPoint architecture. I first reduced the number of CNN layers in the baseline SuperPoint architecture, which I called "SuperPoint Compact", and then I additionally reduced the dimensionality of the feature descriptors extracted by SuperPoint from 256 to 128. The overall number of trainable parameters in each architecture are shown below
 
-INSERT IMAGE OF ARCHITECTURE PARAMS
+TODO INSERT IMAGE OF ARCHITECTURE PARAMS
 
+To address the second goal, I explored changing the weights of the loss function to favor "consistency" of feature descriptors over how confidently SuperPoint actually detects features. The loss function, shown below, weights the _descriptor_ loss which is measured by how similar two feature descriptors are in an original image and the warped version of the images, and the _detector_ loss, which is measured by how well SuperPoint actually detected keypoints. By increasing lambda, we put more stock into the overall consistency of feature descriptors rather that feature detection, which intuitively should improve precision. I re-trained SuperPoint with lambda=0.001 rather than the lambda=0.0001 described in the original paper. 
+
+TODO INSERT IMAGE OF LOSS FUNCTION
+
+To address the third goal, I retrained SuperGlue using the [EUROC](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets#the_euroc_mav_dataset) dataset, which is visual flight data from a micro-aerial vehicle. I evaluated its performance on both a standard evaluation dataset and specifically on the EUROC dataset to see if performance in the specific environment captured by EUROC was improved. 
+
+TODO INSERT IMAGE OF EUROC
+
+## Results
+
+### Goal 1: Reducing dimensionality
+
+### Goal 2: Improving precision
+
+### Goal 3: Domain-specific adaptation
 
 
 
