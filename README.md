@@ -23,9 +23,10 @@ Classical computer vision has created many handcrafted solutions for this proble
 
 Ex: 
 Image 1 has feature descriptors A = (1, 1) and B = (1, 2)
+
 Image 2 has feature descriptors C = (2, 1) and D = (0.5, 1)
 
-Thus feature A would match with feature D since they are closest to each other. Meanwhile, feature C remains unmatched since it is closest to A, but A is closest to D. Feature B also remains unmatched.
+Thus feature A would match with feature D since they are closest to each other (distance 0.5). Meanwhile, feature C remains unmatched since it is closest to A (distance = 1), but A is closest to D. Feature B also remains unmatched since its closest feature is C.
 
 Notice that the feature matching process does not incorporate information about where the points are in the image. This is a huge loss of information as location of keypoints informs us quite a bit on how to match the keypoints. There are some feature matching approaches (such as optical flow) that do consider keypoint location when matching, but these methods require that the two images are visually close together.
 
