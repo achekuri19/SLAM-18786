@@ -124,9 +124,12 @@ TODO INSERT SUPERGLUE SEQUENTIAL HISTOGRAMS
 | SuperGlue (pretrained) | 0.902 | 284.8 |
 | SuperGlue EUROC | 0.918 | 91.0 |
 
-However, when evaluating on the test set of the EUROC data (shown above), it is clear that the domain-specific training worked. While the precision is similar between the two, the total number of inliers keypoints is significantly higher, indicating the training allowed the network to be more confident about feature matches in this specific environment. The difference in results between the two networks are shown visually below.
+However, when evaluating on the test set of the EUROC data (shown above), it is clear that the domain-specific training worked. While the precision is similar between the two, the total number of inliers keypoints is significantly higher, indicating the training allowed the network to be more confident about feature matches in this specific environment. The difference in results between the two networks are shown visually below. (pretrained above, mine below)
 
-TODO INSERT SUPERGLUE SEQUENTIAL GIF
+https://github.com/achekuri19/SLAM-18786/assets/19337786/b6d972a5-51ef-41e4-afd5-b270a31d9ccd
+
+https://github.com/achekuri19/SLAM-18786/assets/19337786/9c7056cf-bb82-4f85-8c53-ad53e053aa0a
+
 
 
 
