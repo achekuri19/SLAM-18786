@@ -39,38 +39,70 @@ The big advantages of SuperPoint and SuperGlue are that they address the challen
 SuperGlue utilizes an attentional graph neural network (GNN) after encoding both keypoint descriptors and location in images to perform feature matching. By leveraging this framework, SuperGlue better matches keypoints by considering the overall structure of the image. Also note that SuperGlue can actually be trained with ANY feature descriptor. SuperGlue, with slight modification, can be trained to use SIFT feature descriptors. However, as I will describe later, SuperPoint proves to be a foundationally superior keypoint detector to SIFT.
 
 ## Goals of this reimplementation
-The central goal of my reimplementation of these papers is to see if I can optimize both SuperPoint and SuperGlue to run on a platform with very limited compute e.g. on a micro aerial vehicle (MAV). My goal was essentially to see if I could 
+The central goal of my reimplementation of these papers is to see if I can optimize both SuperPoint and SuperGlue to run on a platform with very limited compute e.g. on a micro aerial vehicle (video showing live featured matching on MAV below).
 
-TODO INSERT GIF OF OPTICAL FLOW RUNNING ON MAV
+
+
+https://github.com/achekuri19/SLAM-18786/assets/19337786/04b11e18-052b-4b22-8f18-b2fe3301f72c
+
+
+
+My goal was essentially to see if I could 
 
 1) reduce the computation time for SuperPoint without sacrificing performance,
 2) improve the overall precision of feature matching
 3) see if I can adapt the feature matching pipeline to perform better in a specific environment without sacrificing too much general performance.
 4) generally learn to implement the full training pipeline for both SuperPoint and SuperGlue (I trained SuperPoint from scratch and re-trained SuperGlue. The datasets used to train both are not publically available)
 
+## Training Process
+
+### SuperPoint
+
+The training process for SuperPoint feature detection is self-supervised, meaning the pipeline works without hand-labeled data. However, there has to be some starting point to learn feature point detection. To that end, a dataset called _Synthetic Shapes_ is created, which is essentially a randomly generated set of polygonal features with added noise. The vertices are labeled as keypoints, and we train a model called _MagicPoint_, which is just SuperPoint without feature description, only feature detection. An image in the Synthetic Shapes dataset with keypoints shown is below.
+
+![MagicPoint](https://github.com/achekuri19/SLAM-18786/assets/19337786/049aa561-2a8f-4c53-80d9-2a570ffe4747)
+
+After this, we use the bootstrapped MagicPoint feature detector on datasets of real images. I used the COCO 2017 dataset. _Homographic augmentation_ is also used to help with feature detection. We use MagicPoint to detect features in an image, then warp the image several times and re-run feature detection. The detected points in the warped images are unwarped back to the original image. This superset defines the "keypoints" in the original image. This process is illustrated below. 
+
+![homo_aug](https://github.com/achekuri19/SLAM-18786/assets/19337786/6c040965-b505-4106-9b44-b4a22925180d)
+
+And data created from the homographic augmentation is shown below: 
+
+
+### SuperGlue
+
 ## Experiments
 
 To address the first goal, I explored reducing the overall size of the SuperPoint architecture. I first reduced the number of CNN layers in the baseline SuperPoint architecture, which I called "SuperPoint Compact", and then I additionally reduced the dimensionality of the feature descriptors extracted by SuperPoint from 256 to 128. The overall number of trainable parameters in each architecture are shown below
 
-TODO INSERT IMAGE OF ARCHITECTURE PARAMS
+| Architecture | # Parameters | 
+| :---         |     ---:      | 
+| SuperPoint (pretrained)   | 1.3M |
+| SuperPoint Compact  | 1.08M |
+| SuperPoint Compact v2  | 0.73M |
 
 To address the second goal, I explored changing the weights of the loss function to favor "consistency" of feature descriptors over how confidently SuperPoint actually detects features. The loss function, shown below, weights the _descriptor_ loss which is measured by how similar two feature descriptors are in an original image and the warped version of the images, and the _detector_ loss, which is measured by how well SuperPoint actually detected keypoints. By increasing lambda, we put more stock into the overall consistency of feature descriptors rather that feature detection, which intuitively should improve precision. I re-trained SuperPoint with lambda=0.001 rather than the lambda=0.0001 described in the original paper. 
 
-TODO INSERT IMAGE OF LOSS FUNCTION
+![lambda](https://github.com/achekuri19/SLAM-18786/assets/19337786/4d56305d-8d05-4a4f-9d3f-a2db21f68d7b)
+
 
 To address the third goal, I retrained SuperGlue using the [EUROC](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets#the_euroc_mav_dataset) dataset, which is visual flight data from a micro-aerial vehicle. I also made a slight modification to the loss function which I will describe later (and in my video). I evaluated its performance on both a standard evaluation dataset and specifically on the EUROC dataset to see if performance in the specific environment captured by EUROC (shown below) was improved. 
 
-TODO INSERT IMAGE OF EUROC
+![euroc](https://github.com/achekuri19/SLAM-18786/assets/19337786/dfdb8cd7-91b1-45a8-a0be-2e274c399d54)
+
 
 ## Results
+![sift_super_prec](https://github.com/achekuri19/SLAM-18786/assets/19337786/1b1e36f5-e7bf-491d-be48-7fc422928c48)
 
-TODO INSERT PRECISION AND TOTAL FOR SIFT SUPERPOINT
+
+![sift_super_inlier](https://github.com/achekuri19/SLAM-18786/assets/19337786/7a0d1eec-dfd2-4d1c-9744-1ff5798f13f9)
+
+
 
 First, the performance of SIFT and SuperPoint are shown above. Both detect similar number of inlier features, but SuperPoint is clearly higher precision. SuperPoint also runs in 28.5 ms versus 162 ms for SIFT extraction.
 
 ### Goal 1: Reducing dimensionality
 
-TODO INSERT PRECISION AND TOTAL HISTOGRAM FOR COMPACT
 
 As shown above, the first iteration a faster SuperPoint, SuperPoint Compact, did not produce such ideal results in terms of precision. The average precision on the same dataset was lower, although the total number of inlier features detected was similar. Even the latency of running SuperPoint Compact was similar. 
 
@@ -86,6 +118,8 @@ Finally, the overall precision, total inlier points detected, number of paramete
 | SuperPoint (pretrained)   | 0.367 | 49.2 | 1.3M | 28.4 |
 | SuperPoint Compact  | 0.107 | 68.0 | 1.08M | 29.4 |
 | SuperPoint Compact v2  | 0.113 | 46.6 | 0.73M | 15.4 |
+
+As aside, I realized that it is difficult to separate the results of training these networks from the data used. The official paper uses data that is unreleased to bootstrap the feature detection. I believe the consistently low precision seen from my training could be the result of having an over-eager MagicPoint network which detects a lot more keypoints than the pretrained network. The training pipeline, therefore, tries to optimize for all the keypoints detected by MagicPoint.
 
 
 ### Goal 2: Improving precision
